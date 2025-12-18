@@ -609,7 +609,7 @@ const ProductDetails = () => {
                               }}
                               whileHover={{ scale: 1.02, y: -2 }}
                               transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                              className="bg-white rounded-2xl p-6 border border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] cursor-pointer transition-shadow duration-300"
+                              className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md cursor-pointer"
                             >
                               <h4 className="font-semibold text-lg text-slate-900 mb-3">{care.title}</h4>
                               <p className="text-slate-600 text-sm leading-relaxed">{care.desc}</p>

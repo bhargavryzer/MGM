@@ -140,8 +140,6 @@ const Catalogue = () => {
     selectedCollections.length +
     (priceRange[0] > 0 || priceRange[1] < 300000 ? 1 : 0);
 
-  // Filter UI moved to reusable component `FilterSidebar`
-
   return (
     <AnimatedPage className="min-h-screen bg-background">
       <Header />
@@ -181,13 +179,13 @@ const Catalogue = () => {
 
         <div className="container mx-auto px-4 -mt-8 relative z-20">
           {/* Modern Toolbar Card */}
-          <Card className="bg-background/95 backdrop-blur-md border-border/50 shadow-xl">
+          <Card className="bg-background/95 backdrop-blur-md border-border/50 shadow-xl mb-8">
             <div className="p-6">
               <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                 {/* Left Section - Search & Filters */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1 w-full lg:w-auto">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1 w-full lg:w-auto">
                   {/* Modern Search Bar */}
-                  <div className="relative flex-1 sm:max-w-md">
+                  <div className="relative flex-1 w-full sm:max-w-md">
                     <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
                       placeholder="Search luxury jewelry..."
@@ -201,7 +199,7 @@ const Catalogue = () => {
                   <Button
                     variant="outline"
                     onClick={() => setIsFilterOpen(!isFilterOpen)}
-                    className="lg:hidden h-12 px-6 rounded-lg border-primary/30 hover:bg-primary/10"
+                    className="lg:hidden h-14 px-6 rounded-xl border-primary/30 hover:bg-primary/10 w-full sm:w-auto"
                   >
                     <SlidersHorizontal className="w-5 h-5 mr-2" />
                     Filters
@@ -221,7 +219,7 @@ const Catalogue = () => {
                       variant={viewMode === "grid" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setViewMode("grid")}
-                      className="rounded-md h-8 w-8 p-0"
+                      className="rounded-md h-10 w-10 p-0"
                     >
                       <Grid className="w-4 h-4" />
                     </Button>
@@ -229,17 +227,17 @@ const Catalogue = () => {
                       variant={viewMode === "list" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setViewMode("list")}
-                      className="rounded-md h-8 w-8 p-0"
+                      className="rounded-md h-10 w-10 p-0"
                     >
                       <List className="w-4 h-4" />
                     </Button>
                   </div>
 
                   {/* Modern Sort Dropdown */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-1 sm:flex-initial">
                     <span className="text-sm font-body text-muted-foreground hidden sm:inline">Sort</span>
                     <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="w-48 h-10 border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg bg-background/50">
+                      <SelectTrigger className="w-full sm:w-48 h-10 border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg bg-background/50">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="border-border/50">
@@ -260,38 +258,70 @@ const Catalogue = () => {
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-sm font-body text-muted-foreground">Active filters:</span>
                     {selectedCategories.map((cat) => (
-                      <Badge key={cat} variant="secondary" className="gap-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
+                      <Badge 
+                        key={cat} 
+                        variant="secondary" 
+                        className="gap-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors"
+                      >
                         {categories.find(c => c.id === cat)?.name}
-                        <button onClick={() => toggleCategory(cat)} className="ml-1 hover:text-destructive transition-colors">
+                        <button 
+                          onClick={() => toggleCategory(cat)} 
+                          className="ml-1 hover:text-destructive transition-colors"
+                        >
                           ×
                         </button>
                       </Badge>
                     ))}
                     {selectedMetals.map((metal) => (
-                      <Badge key={metal} variant="secondary" className="gap-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
+                      <Badge 
+                        key={metal} 
+                        variant="secondary" 
+                        className="gap-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors"
+                      >
                         {metal}
-                        <button onClick={() => toggleMetal(metal)} className="ml-1 hover:text-destructive transition-colors">
+                        <button 
+                          onClick={() => toggleMetal(metal)} 
+                          className="ml-1 hover:text-destructive transition-colors"
+                        >
                           ×
                         </button>
                       </Badge>
                     ))}
                     {selectedCollections.map((col) => (
-                      <Badge key={col} variant="secondary" className="gap-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
+                      <Badge 
+                        key={col} 
+                        variant="secondary" 
+                        className="gap-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors"
+                      >
                         {collections.find(c => c.id === col)?.label}
-                        <button onClick={() => toggleCollection(col)} className="ml-1 hover:text-destructive transition-colors">
+                        <button 
+                          onClick={() => toggleCollection(col)} 
+                          className="ml-1 hover:text-destructive transition-colors"
+                        >
                           ×
                         </button>
                       </Badge>
                     ))}
                     {(priceRange[0] > 0 || priceRange[1] < 300000) && (
-                      <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
+                      <Badge 
+                        variant="secondary" 
+                        className="gap-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors"
+                      >
                         {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
-                        <button onClick={() => setPriceRange([0, 300000])} className="ml-1 hover:text-destructive transition-colors">
+                        <button 
+                          onClick={() => setPriceRange([0, 300000])} 
+                          className="ml-1 hover:text-destructive transition-colors"
+                        >
                           ×
                         </button>
                       </Badge>
                     )}
-                    <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs h-8 hover:bg-destructive/10 hover:text-destructive transition-colors">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={clearFilters} 
+                      className="text-xs h-8 hover:bg-destructive/10 hover:text-destructive transition-colors"
+                    >
                       Clear All
                     </Button>
                   </div>
@@ -299,9 +329,6 @@ const Catalogue = () => {
               )}
             </div>
           </Card>
-
-          {/* Modern Results Count */}
-          {/* Results header removed per design: counts are shown in toolbar badges and active filters */}
 
           <div className="flex gap-8">
             {/* Modern Sidebar Filters - Desktop */}
@@ -352,7 +379,7 @@ const Catalogue = () => {
                         </h3>
                         <button
                           onClick={() => setIsFilterOpen(false)}
-                          className="p-2"
+                          className="p-2 hover:bg-muted rounded-lg transition-colors"
                         >
                           <X className="w-5 h-5" />
                         </button>
@@ -387,7 +414,7 @@ const Catalogue = () => {
 
                       <Button
                         onClick={() => setIsFilterOpen(false)}
-                        className="w-full"
+                        className="w-full h-12"
                       >
                         Apply Filters
                       </Button>
@@ -398,13 +425,14 @@ const Catalogue = () => {
             </AnimatePresence>
 
             {/* Modern Products Grid */}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               {paginatedProducts.length > 0 ? (
                 <>
                   {/* Modern Grid/List View */}
-                  <div className={viewMode === "grid" 
-                    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8" 
-                    : "space-y-4"
+                  <div className={
+                    viewMode === "grid" 
+                      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6" 
+                      : "space-y-6"
                   }>
                     {paginatedProducts.map((product, index) => (
                       <motion.div
@@ -429,8 +457,8 @@ const Catalogue = () => {
                             </div>
                           </div>
                         ) : (
-                          <Card className="flex gap-6 p-6 transition-all duration-300 border-border/50 hover:border-primary/50 bg-background/80 backdrop-blur-sm group hover:shadow-2xl hover:-translate-y-1">
-                            <div className="w-32 h-32 rounded-xl overflow-hidden flex-shrink-0 transform transition-transform duration-500 group-hover:scale-110">
+                          <Card className="flex flex-col sm:flex-row gap-6 p-6 transition-all duration-300 border-border/50 hover:border-primary/50 bg-background/80 backdrop-blur-sm group hover:shadow-2xl hover:-translate-y-1">
+                            <div className="w-full sm:w-32 h-48 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 transform transition-transform duration-500 group-hover:scale-110">
                               <img
                                 src={product.image}
                                 alt={product.name}
@@ -439,36 +467,40 @@ const Catalogue = () => {
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-4 mb-3">
-                                <div className="flex-1">
+                                <div className="flex-1 min-w-0">
                                   <h3 className="font-heading text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300 line-clamp-2">
                                     {product.name}
                                   </h3>
-                                  <p className="text-sm text-muted-foreground capitalize mb-2">
+                                  <p className="text-sm text-muted-foreground capitalize mt-1">
                                     {product.category}
                                   </p>
                                 </div>
-                                <div className="flex flex-col items-end gap-2">
+                                <div className="flex flex-col items-end gap-2 flex-shrink-0">
                                   {product.isNew && (
-                                    <Badge variant="secondary" className="text-xs bg-gold/20 text-gold-dark border-gold/30">New</Badge>
+                                    <Badge variant="secondary" className="text-xs bg-gold/20 text-gold-dark border-gold/30">
+                                      New
+                                    </Badge>
                                   )}
                                   {product.isBestSeller && (
-                                    <Badge variant="outline" className="text-xs border-primary/30 text-primary">Bestseller</Badge>
+                                    <Badge variant="outline" className="text-xs border-primary/30 text-primary">
+                                      Bestseller
+                                    </Badge>
                                   )}
                                 </div>
                               </div>
                               
-                              <div className="flex items-center gap-3 mb-4">
+                              <div className="flex items-center gap-3 mb-4 flex-wrap">
                                 <div className="flex items-center gap-1">
                                   <Star className="w-4 h-4 fill-gold text-gold" />
                                   <span className="text-sm font-medium">{(product as any).rating || 4.5}</span>
                                 </div>
-                                <Separator orientation="vertical" className="h-4" />
+                                <Separator orientation="vertical" className="h-4 hidden sm:block" />
                                 <span className="text-sm text-muted-foreground">
                                   {product.metal} • {product.purity}
                                 </span>
                               </div>
                               
-                              <div className="flex items-center justify-between">
+                              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                 <div>
                                   <span className="text-xl font-bold text-primary">{formatPrice(product.price)}</span>
                                   {product.originalPrice && (
@@ -477,7 +509,7 @@ const Catalogue = () => {
                                     </span>
                                   )}
                                 </div>
-                                <Button size="sm" className="bg-gradient-mgm hover:opacity-90 transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                                <Button size="sm" className="bg-gradient-mgm hover:opacity-90 transition-all duration-300 hover:scale-105 hover:shadow-lg w-full sm:w-auto">
                                   View Details
                                 </Button>
                               </div>
@@ -490,18 +522,18 @@ const Catalogue = () => {
 
                   {/* Modern Pagination */}
                   {totalPages > 1 && (
-                    <div className="flex items-center justify-center gap-2 mt-16">
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                         disabled={currentPage === 1}
-                        className="border-primary/30 hover:bg-primary/10 transition-all duration-300 hover:scale-105"
+                        className="w-full sm:w-auto border-primary/30 hover:bg-primary/10 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Previous
                       </Button>
                       
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-2 flex-wrap justify-center">
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                           <Button
                             key={page}
@@ -524,7 +556,7 @@ const Catalogue = () => {
                         size="sm"
                         onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                         disabled={currentPage === totalPages}
-                        className="border-primary/30 hover:bg-primary/10 transition-all duration-300 hover:scale-105"
+                        className="w-full sm:w-auto border-primary/30 hover:bg-primary/10 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Next
                       </Button>
@@ -547,13 +579,20 @@ const Catalogue = () => {
                           : "No pieces match your current filters"
                         }
                       </p>
-                      <div className="flex gap-4 justify-center">
+                      <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         {searchQuery && (
-                          <Button variant="outline" onClick={() => setSearchQuery("")} className="border-primary/30 hover:bg-primary/10 transition-all duration-300 hover:scale-105">
+                          <Button 
+                            variant="outline" 
+                            onClick={() => setSearchQuery("")} 
+                            className="border-primary/30 hover:bg-primary/10 transition-all duration-300 hover:scale-105"
+                          >
                             Clear Search
                           </Button>
                         )}
-                        <Button onClick={clearFilters} className="bg-gradient-mgm hover:opacity-90 transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                        <Button 
+                          onClick={clearFilters} 
+                          className="bg-gradient-mgm hover:opacity-90 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                        >
                           Clear Filters
                         </Button>
                       </div>
