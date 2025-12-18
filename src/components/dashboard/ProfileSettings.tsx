@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { User, Mail, Phone, MapPin, Save, Camera } from "lucide-react";
+import { User, Mail, Phone, MapPin, Save, Camera, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,14 +22,19 @@ const ProfileSettings = () => {
     return saved
       ? JSON.parse(saved)
       : {
-          name: "",
-          email: "",
-          phone: "",
-          address: "",
+          name: "Priya Sharma",
+          email: "priya.sharma@email.com",
+          phone: "+91 98765 43210",
+          address: "123 Jewelers Lane, Zaveri Bazaar, Mumbai - 400002, Maharashtra, India",
           avatar: "",
         };
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showAvatarDialog, setShowAvatarDialog] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState<string>("");
+  const [showPreferencesDialog, setShowPreferencesDialog] = useState(false);
+  const [selectedPreference, setSelectedPreference] = useState<string>("");
   const { toast } = useToast();
 
   const handleChange = (field: keyof UserProfile, value: string) => {
@@ -43,17 +48,47 @@ const ProfileSettings = () => {
     const reader = new FileReader();
     reader.onload = (e) => {
       if (e.target?.result) {
-        handleChange("avatar", e.target.result as string);
+        setSelectedAvatar(e.target.result as string);
+        setShowAvatarDialog(true);
       }
     };
     reader.readAsDataURL(file);
   };
 
+  const confirmAvatarChange = () => {
+    handleChange("avatar", selectedAvatar);
+    setShowAvatarDialog(false);
+    toast({
+      title: "Avatar Updated",
+      description: "Your profile picture has been updated successfully",
+    });
+  };
+
+  const handlePreferenceClick = (preference: string) => {
+    setSelectedPreference(preference);
+    setShowPreferencesDialog(true);
+  };
+
+  const confirmPreferenceChange = () => {
+    // Handle preference change logic here
+    toast({
+      title: "Preference Updated",
+      description: `${selectedPreference} preference has been updated`,
+    });
+    setShowPreferencesDialog(false);
+    setSelectedPreference("");
+  };
+
   const handleSave = () => {
+    setShowSaveDialog(true);
+  };
+
+  const confirmSave = () => {
     setIsLoading(true);
     setTimeout(() => {
       localStorage.setItem("userProfile", JSON.stringify(profile));
       setIsLoading(false);
+      setShowSaveDialog(false);
       toast({
         title: "Profile Updated",
         description: "Your profile has been saved successfully",
@@ -62,21 +97,21 @@ const ProfileSettings = () => {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-8">
+    <div className="p-4 lg:p-6 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="font-display text-3xl text-foreground mb-2">Profile Settings</h1>
-        <p className="text-muted-foreground">
+      <div className="bg-gradient-mgm rounded-xl p-4 text-primary-foreground shadow-lg">
+        <h1 className="font-display text-2xl font-bold mb-1">Profile Settings</h1>
+        <p className="text-primary-foreground/90 text-sm">
           Manage your account information and preferences
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid lg:grid-cols-3 gap-6">
         {/* Profile Picture */}
-        <Card className="border-border/50 lg:col-span-1">
-          <CardContent className="p-6">
+        <Card className="border-border/50 lg:col-span-1 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
+          <CardContent className="p-4">
             <div className="text-center">
-              <div className="relative w-32 h-32 mx-auto mb-4">
+              <div className="relative w-28 h-28 mx-auto mb-3">
                 <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                   {profile.avatar ? (
                     <img
@@ -88,7 +123,7 @@ const ProfileSettings = () => {
                     <User className="w-16 h-16 text-primary" />
                   )}
                 </div>
-                <label className="absolute bottom-0 right-0 p-2 bg-primary rounded-full cursor-pointer hover:bg-primary/90 transition-colors">
+                <label className="absolute bottom-0 right-0 p-2 bg-primary rounded-full cursor-pointer hover:bg-primary/90 transition-all duration-300 hover:scale-110">
                   <Camera className="w-4 h-4 text-primary-foreground" />
                   <input
                     type="file"
@@ -109,14 +144,14 @@ const ProfileSettings = () => {
         </Card>
 
         {/* Profile Form */}
-        <Card className="border-border/50 lg:col-span-2">
-          <CardHeader>
+        <Card className="border-border/50 lg:col-span-2 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+          <CardHeader className="pb-4">
             <CardTitle>Personal Information</CardTitle>
             <CardDescription>
               Update your personal details here
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
@@ -177,7 +212,7 @@ const ProfileSettings = () => {
               </div>
             </div>
 
-            <Button onClick={handleSave} disabled={isLoading} className="gap-2">
+            <Button onClick={handleSave} disabled={isLoading} className="gap-2 border-primary/30 hover:bg-primary/10 transition-all duration-300 hover:scale-105">
               <Save className="w-4 h-4" />
               {isLoading ? "Saving..." : "Save Changes"}
             </Button>
@@ -186,36 +221,182 @@ const ProfileSettings = () => {
       </div>
 
       {/* Preferences */}
-      <Card className="border-border/50">
-        <CardHeader>
+      <Card className="border-border/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+        <CardHeader className="pb-3">
           <CardTitle>Preferences</CardTitle>
           <CardDescription>
             Customize your experience
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="p-4 rounded-lg bg-muted/30 border border-border/50">
-              <h4 className="font-medium text-foreground mb-1">Notifications</h4>
-              <p className="text-sm text-muted-foreground">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <button
+              type="button"
+              className="p-3 rounded-lg bg-muted/30 border border-border/50 hover:bg-primary/10 transition-all duration-300 cursor-pointer"
+              onClick={() => handlePreferenceClick("Notifications")}
+            >
+              <h4 className="font-medium text-foreground mb-1 text-sm">Notifications</h4>
+              <p className="text-xs text-muted-foreground">
                 Receive updates about your orders and offers
               </p>
-            </div>
-            <div className="p-4 rounded-lg bg-muted/30 border border-border/50">
-              <h4 className="font-medium text-foreground mb-1">Newsletter</h4>
-              <p className="text-sm text-muted-foreground">
-                Get the latest collections and exclusive deals
+            </button>
+            <button
+              type="button"
+              className="p-3 rounded-lg bg-muted/30 border border-border/50 hover:bg-primary/10 transition-all duration-300 cursor-pointer"
+              onClick={() => handlePreferenceClick("Newsletter")}
+            >
+              <h4 className="font-medium text-foreground mb-1 text-sm">Newsletter</h4>
+              <p className="text-xs text-muted-foreground">
+                Get latest collections and exclusive deals
               </p>
-            </div>
-            <div className="p-4 rounded-lg bg-muted/30 border border-border/50">
-              <h4 className="font-medium text-foreground mb-1">Language</h4>
-              <p className="text-sm text-muted-foreground">
+            </button>
+            <button
+              type="button"
+              className="p-3 rounded-lg bg-muted/30 border border-border/50 hover:bg-primary/10 transition-all duration-300 cursor-pointer"
+              onClick={() => handlePreferenceClick("Language")}
+            >
+              <h4 className="font-medium text-foreground mb-1 text-sm">Language</h4>
+              <p className="text-xs text-muted-foreground">
                 English (India)
               </p>
-            </div>
+            </button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Save Confirmation Dialog */}
+      {showSaveDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-background rounded-xl shadow-xl max-w-md w-full overflow-hidden"
+          >
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground">Save Profile Changes</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Are you sure you want to save the changes to your profile?
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowSaveDialog(false)}
+                  className="border-primary/30 hover:bg-primary/10 transition-all duration-300"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={confirmSave}
+                  disabled={isLoading}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300"
+                >
+                  {isLoading ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Avatar Confirmation Dialog */}
+      {showAvatarDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-background rounded-xl shadow-xl max-w-md w-full overflow-hidden"
+          >
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Camera className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground">Update Profile Picture</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Are you sure you want to update your profile picture?
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 mb-4">
+                <img
+                  src={selectedAvatar}
+                  alt="New avatar"
+                  className="w-16 h-16 rounded-full object-cover border-2 border-border"
+                />
+                <div className="flex-1">
+                  <p className="text-sm text-muted-foreground">New profile picture preview</p>
+                </div>
+              </div>
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowAvatarDialog(false)}
+                  className="border-primary/30 hover:bg-primary/10 transition-all duration-300"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={confirmAvatarChange}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300"
+                >
+                  Update Picture
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Preferences Confirmation Dialog */}
+      {showPreferencesDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-background rounded-xl shadow-xl max-w-md w-full overflow-hidden"
+          >
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground">Update Preferences</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Are you sure you want to update your {selectedPreference} preference?
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowPreferencesDialog(false)}
+                  className="border-primary/30 hover:bg-primary/10 transition-all duration-300"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={confirmPreferenceChange}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300"
+                >
+                  Update Preference
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
