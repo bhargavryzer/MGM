@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Calendar, Truck, Shield, RefreshCcw, ChevronLeft, ChevronRight, Gem, Scale, Award, Share2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,6 +10,7 @@ import ProductCard from "@/components/ProductCard";
 import BookAppointmentModal from "@/components/BookAppointmentModal";
 import { products, formatPrice } from "@/data/products";
 import { useToast } from "@/hooks/use-toast";
+import { useWishlist } from "@/hooks/use-wishlist";
 import AnimatedPage from "@/components/AnimatedPage";
 import { slideUpVariants, scaleInVariants } from "@/lib/animations";
 
@@ -44,10 +45,56 @@ const ProductDetails = () => {
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
+  // lightbox state
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+  const touchStartRef = useRef<number | null>(null);
+  const touchMovedRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (!isLightboxOpen) return;
+      if (e.key === 'ArrowLeft') setSelectedImageIndex((i) => (i === 0 ? images.length - 1 : i - 1));
+      if (e.key === 'ArrowRight') setSelectedImageIndex((i) => (i === images.length - 1 ? 0 : i + 1));
+      if (e.key === 'Escape') setIsLightboxOpen(false);
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isLightboxOpen, images.length]);
+
+  function onTouchStart(e: React.TouchEvent) {
+    touchStartRef.current = e.touches[0].clientX;
+    touchMovedRef.current = null;
+  }
+
+  function onTouchMove(e: React.TouchEvent) {
+    touchMovedRef.current = e.touches[0].clientX;
+  }
+
+  function onTouchEnd() {
+    if (touchStartRef.current == null || touchMovedRef.current == null) return;
+    const delta = touchMovedRef.current - touchStartRef.current;
+    const threshold = 40; // px
+    if (delta > threshold) {
+      // swipe right -> previous
+      setSelectedImageIndex((i) => (i === 0 ? images.length - 1 : i - 1));
+    } else if (delta < -threshold) {
+      // swipe left -> next
+      setSelectedImageIndex((i) => (i === images.length - 1 ? 0 : i + 1));
+    }
+    touchStartRef.current = null;
+    touchMovedRef.current = null;
+  }
+
+  const wishlist = useWishlist();
+
   const handleAddToWishlist = () => {
+    const idNum = Number(product.id);
+    wishlist.toggle(idNum);
+    const now = wishlist.isIn(idNum);
     toast({
-      title: "Added to Wishlist",
-      description: `${product.name} has been added to your wishlist.`,
+      title: now ? "Added to Wishlist" : "Removed from Wishlist",
+      description: now ? `${product.name} has been added to your wishlist.` : `${product.name} has been removed from your wishlist.`,
     });
   };
 
@@ -100,12 +147,20 @@ const ProductDetails = () => {
                 className="lg:col-span-7 space-y-4"
               >
                 {/* Main Image */}
-                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-cream to-cream-dark shadow-lg">
-                  <img
-                    src={images[selectedImageIndex]}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
+                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-cream to-cream-dark shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
+                  <button
+                    onClick={() => setIsLightboxOpen(true)}
+                    className="w-full h-full"
+                    aria-label="Open image viewer"
+                  >
+                    <img
+                      src={images[selectedImageIndex]}
+                      alt={product.name}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover cursor-zoom-in"
+                    />
+                  </button>
                   {images.length > 1 && (
                     <>
                       <button
@@ -155,11 +210,11 @@ const ProductDetails = () => {
                   {/* Actions overlay */}
                   <div className="absolute top-4 right-4 flex flex-col gap-2">
                     <button
-                      onClick={handleAddToWishlist}
-                      className="p-3 bg-background/95 rounded-full hover:bg-background transition-all shadow-lg hover:scale-110 group"
+                      onClick={() => { wishlist.toggle(Number(product.id)); const now = wishlist.isIn(Number(product.id)); toast({ title: now ? 'Added to Wishlist' : 'Removed from Wishlist', description: now ? `${product.name} has been added to your wishlist.` : `${product.name} has been removed from your wishlist.` }); }}
+                      className={`p-3 bg-background/95 rounded-full hover:bg-background transition-all shadow-lg hover:scale-110 group ${wishlist.isIn(Number(product.id)) ? 'ring-2 ring-amber-200' : ''}`}
                       aria-label="Add to wishlist"
                     >
-                      <Heart className="w-5 h-5 group-hover:text-primary transition-colors" />
+                      <Heart className={`w-5 h-5 transition-colors ${wishlist.isIn(Number(product.id)) ? 'text-red-500 fill-red-500' : 'group-hover:text-primary'}`} />
                     </button>
                     <button
                       onClick={handleShare}
@@ -180,13 +235,15 @@ const ProductDetails = () => {
                         onClick={() => setSelectedImageIndex(index)}
                         className={`w-20 h-20 rounded-xl overflow-hidden border-2 transition-all hover:scale-105 ${
                           selectedImageIndex === index
-                            ? "border-gold ring-2 ring-gold/30"
-                            : "border-border/50 hover:border-gold/50"
+                            ? "border-amber-500 ring-2 ring-amber-200"
+                            : "border-border/50 hover:border-amber-300"
                         }`}
                       >
                         <img
                           src={img}
                           alt={`${product.name} view ${index + 1}`}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover"
                         />
                       </button>
@@ -272,13 +329,13 @@ const ProductDetails = () => {
                     Book an Appointment
                   </Button>
                   <Button
-                    variant="outline"
+                    variant={wishlist.isIn(Number(product.id)) ? undefined : "outline"}
                     size="lg"
                     onClick={handleAddToWishlist}
                     className="w-full"
                   >
-                    <Heart className="w-5 h-5" />
-                    Add to Wishlist
+                    <Heart className={`w-5 h-5 ${wishlist.isIn(Number(product.id)) ? 'text-red-500 fill-red-500' : ''}`} />
+                    {wishlist.isIn(Number(product.id)) ? 'Saved' : 'Add to Wishlist'}
                   </Button>
                 </div>
 
@@ -307,133 +364,262 @@ const ProductDetails = () => {
               initial="initial"
               animate="animate"
               transition={{ delay: 0.2 }}
-              className="mt-16"
+              className="mt-20"
             >
+              <div className="max-w-4xl mx-auto">
+                <div className="mb-8">
+                  <h2 className="font-display text-3xl font-bold text-foreground mb-2">Product Information</h2>
+                  <p className="text-muted-foreground text-lg">Explore comprehensive details about this exquisite piece</p>
+                </div>
+              </div>
               <Tabs defaultValue="details" className="w-full">
-                <TabsList className="w-full max-w-2xl mx-auto grid grid-cols-3 h-14 mb-8 bg-cream rounded-xl p-1">
-                  <TabsTrigger value="details" className="rounded-lg font-medium data-[state=active]:bg-background data-[state=active]:shadow-md">
-                    Gold Details
-                  </TabsTrigger>
-                  <TabsTrigger value="stones" className="rounded-lg font-medium data-[state=active]:bg-background data-[state=active]:shadow-md">
-                    Stone Details
-                  </TabsTrigger>
-                  <TabsTrigger value="care" className="rounded-lg font-medium data-[state=active]:bg-background data-[state=active]:shadow-md">
-                    Care Guide
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="details" className="mt-0">
-                  <div className="max-w-4xl mx-auto bg-gradient-to-br from-cream to-cream-dark rounded-2xl p-8">
-                    <h3 className="font-display text-2xl font-semibold mb-6 flex items-center gap-3">
-                      <Scale className="w-6 h-6 text-gold" />
-                      Gold Specifications
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                      {[
-                        { label: "Karatage", value: product.karatage },
-                        { label: "Gold Weight", value: product.goldWeight || product.weight },
-                        { label: "Gross Weight", value: product.weight },
-                        { label: "Purity", value: product.purity },
-                        { label: "Making Charges", value: product.makingCharges || "12%" },
-                        { label: "Metal", value: product.metal },
-                      ].map((spec, index) => (
-                        <div key={index} className="bg-background rounded-xl p-4 shadow-sm">
-                          <p className="text-sm text-muted-foreground mb-1">{spec.label}</p>
-                          <p className="font-semibold text-lg">{spec.value}</p>
-                        </div>
-                      ))}
-                    </div>
+                <div className="max-w-4xl mx-auto">
+                  <div className="bg-gradient-to-r from-cream via-cream to-gold/5 rounded-3xl p-4 flex items-center justify-center mb-8 relative shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-gold/10">
+                    <TabsList className="flex items-center gap-2">
+                      <TabsTrigger value="details" className="px-6 py-3 rounded-full text-sm font-semibold data-[state=active]:bg-gold data-[state=active]:text-foreground data-[state=active]:shadow-lg data-[state=active]:-translate-y-1 transition-all duration-300 text-slate-600 hover:text-slate-900">
+                        <Scale className="w-4 h-4 mr-2 inline" /> Gold Details
+                      </TabsTrigger>
+                      <TabsTrigger value="stones" className="px-6 py-3 rounded-full text-sm font-semibold data-[state=active]:bg-gold data-[state=active]:text-foreground data-[state=active]:shadow-lg data-[state=active]:-translate-y-1 transition-all duration-300 text-slate-600 hover:text-slate-900">
+                        <Gem className="w-4 h-4 mr-2 inline" /> Stone Details
+                      </TabsTrigger>
+                      <TabsTrigger value="care" className="px-6 py-3 rounded-full text-sm font-semibold data-[state=active]:bg-gold data-[state=active]:text-foreground data-[state=active]:shadow-lg data-[state=active]:-translate-y-1 transition-all duration-300 text-slate-600 hover:text-slate-900">
+                        <Sparkles className="w-4 h-4 mr-2 inline" /> Care Guide
+                      </TabsTrigger>
+                    </TabsList>
                   </div>
-                </TabsContent>
+                </div>
 
-                <TabsContent value="stones" className="mt-0">
-                  <div className="max-w-4xl mx-auto bg-gradient-to-br from-cream to-cream-dark rounded-2xl p-8">
-                    <h3 className="font-display text-2xl font-semibold mb-6 flex items-center gap-3">
-                      <Gem className="w-6 h-6 text-gold" />
-                      Stone Specifications
-                    </h3>
-                    {product.stones && product.stones.length > 0 ? (
-                      <div className="space-y-6">
-                        {product.stones.map((stone, index) => (
-                          <div key={index} className="bg-background rounded-xl p-6 shadow-sm">
-                            <h4 className="font-semibold text-lg text-primary mb-4 flex items-center gap-2">
-                              <Sparkles className="w-4 h-4" />
-                              {stone.type}
-                            </h4>
-                            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                              {stone.carat && (
-                                <div>
-                                  <p className="text-xs text-muted-foreground mb-1">Carat</p>
-                                  <p className="font-semibold">{stone.carat} ct</p>
-                                </div>
-                              )}
-                              {stone.count && (
-                                <div>
-                                  <p className="text-xs text-muted-foreground mb-1">Quantity</p>
-                                  <p className="font-semibold">{stone.count} pcs</p>
-                                </div>
-                              )}
-                              {stone.cut && (
-                                <div>
-                                  <p className="text-xs text-muted-foreground mb-1">Cut</p>
-                                  <p className="font-semibold">{stone.cut}</p>
-                                </div>
-                              )}
-                              {stone.clarity && (
-                                <div>
-                                  <p className="text-xs text-muted-foreground mb-1">Clarity</p>
-                                  <p className="font-semibold">{stone.clarity}</p>
-                                </div>
-                              )}
-                              {stone.color && (
-                                <div>
-                                  <p className="text-xs text-muted-foreground mb-1">Color</p>
-                                  <p className="font-semibold">{stone.color}</p>
-                                </div>
-                              )}
+                <AnimatePresence mode="wait">
+                  <TabsContent value="details" className="mt-0" key="details">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                    >
+                      <div className="max-w-4xl mx-auto bg-cream rounded-3xl p-6">
+                        <div className="bg-white rounded-2xl p-8 sm:p-10 shadow-[0_8px_24px_rgba(0,0,0,0.08)] border border-slate-100/50">
+                          <div className="flex items-center gap-4 mb-8">
+                            <div className="w-14 h-14 bg-gradient-to-br from-amber-50 to-amber-100 rounded-full flex items-center justify-center shadow-sm border border-amber-200/50">
+                              <Scale className="w-7 h-7 text-amber-700" />
+                            </div>
+                            <div>
+                              <h3 className="font-display text-2xl font-bold text-slate-900">Gold Specifications</h3>
+                              <p className="text-sm text-slate-500 mt-1">Complete breakdown of precious metal composition</p>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <Gem className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                        <p>This piece features pure gold without gemstones</p>
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="care" className="mt-0">
-                  <div className="max-w-4xl mx-auto bg-gradient-to-br from-cream to-cream-dark rounded-2xl p-8">
-                    <h3 className="font-display text-2xl font-semibold mb-6">Jewelry Care Guide</h3>
-                    <div className="grid md:grid-cols-2 gap-6">
-                      {[
-                        {
-                          title: "Storage",
-                          desc: "Store each piece separately in a soft cloth pouch to prevent scratches. Keep away from direct sunlight and humidity.",
-                        },
-                        {
-                          title: "Cleaning",
-                          desc: "Gently clean with a soft, lint-free cloth. For deeper cleaning, use warm water with mild soap and dry thoroughly.",
-                        },
-                        {
-                          title: "Wearing",
-                          desc: "Remove jewelry before swimming, bathing, or exercising. Apply perfumes and cosmetics before wearing jewelry.",
-                        },
-                        {
-                          title: "Maintenance",
-                          desc: "Visit our store annually for professional cleaning and inspection. We offer complimentary polishing services.",
-                        },
-                      ].map((care, index) => (
-                        <div key={index} className="bg-background rounded-xl p-5 shadow-sm">
-                          <h4 className="font-semibold text-lg mb-2">{care.title}</h4>
-                          <p className="text-muted-foreground text-sm leading-relaxed">{care.desc}</p>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                            {[
+                              { label: "Karatage", value: product.karatage },
+                              { label: "Gold Weight", value: product.goldWeight || product.weight },
+                              { label: "Gross Weight", value: product.weight },
+                              { label: "Purity", value: product.purity },
+                              { label: "Making Charges", value: product.makingCharges || "12%" },
+                              { label: "Metal", value: product.metal },
+                            ].map((spec, index) => (
+                              <motion.div
+                                key={index}
+                                custom={index}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ 
+                                  opacity: 1, 
+                                  scale: 1,
+                                  transition: { 
+                                    delay: index * 0.1, 
+                                    duration: 0.3, 
+                                    ease: [0.4, 0, 0.2, 1] 
+                                  }
+                                }}
+                                whileHover={{ scale: 1.05, y: -4 }}
+                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                className="bg-slate-50 rounded-2xl p-6 border border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] cursor-pointer transition-shadow duration-300"
+                              >
+                                <p className="text-xs uppercase text-slate-400 font-semibold mb-2">{spec.label}</p>
+                                <p className="font-bold text-lg text-slate-900">{spec.value}</p>
+                              </motion.div>
+                            ))}
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </TabsContent>
+                      </div>
+                    </motion.div>
+                  </TabsContent>
+                </AnimatePresence>
+
+                <AnimatePresence mode="wait">
+                  <TabsContent value="stones" className="mt-0" key="stones">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                    >
+                      <div className="max-w-4xl mx-auto bg-cream rounded-3xl p-6">
+                        <div className="flex items-center gap-4 mb-8">
+                          <div className="w-14 h-14 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-full flex items-center justify-center shadow-sm border border-emerald-200/50">
+                            <Gem className="w-7 h-7 text-emerald-700" />
+                          </div>
+                          <div>
+                            <h3 className="font-display text-2xl font-bold text-slate-900">Stone Specifications</h3>
+                            <p className="text-sm text-slate-500 mt-1">Detailed gemstone quality and characteristics</p>
+                          </div>
+                        </div>
+
+                        {product.stones && product.stones.length > 0 ? (
+                          <div className="space-y-4">
+                            {product.stones.map((stone, stoneIndex) => (
+                              <motion.div
+                                key={stoneIndex}
+                                custom={stoneIndex}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ 
+                                  opacity: 1, 
+                                  scale: 1,
+                                  transition: { 
+                                    delay: stoneIndex * 0.15, 
+                                    duration: 0.3, 
+                                    ease: [0.4, 0, 0.2, 1] 
+                                  }
+                                }}
+                                className="bg-white rounded-2xl p-6 border border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
+                              >
+                                <h4 className="font-semibold text-lg text-slate-900 mb-4 flex items-center gap-2">
+                                  <Sparkles className="w-4 h-4 text-amber-600" />
+                                  {stone.type}
+                                </h4>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                                  {stone.carat && (
+                                    <motion.div
+                                      initial={{ opacity: 0, y: 10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: 0.1, duration: 0.2 }}
+                                    >
+                                      <p className="text-xs text-slate-400 mb-1 font-semibold uppercase">Carat</p>
+                                      <p className="font-bold text-base text-slate-900">{stone.carat} ct</p>
+                                    </motion.div>
+                                  )}
+                                  {stone.count && (
+                                    <motion.div
+                                      initial={{ opacity: 0, y: 10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: 0.15, duration: 0.2 }}
+                                    >
+                                      <p className="text-xs text-slate-400 mb-1 font-semibold uppercase">Quantity</p>
+                                      <p className="font-bold text-base text-slate-900">{stone.count} pcs</p>
+                                    </motion.div>
+                                  )}
+                                  {stone.cut && (
+                                    <motion.div
+                                      initial={{ opacity: 0, y: 10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: 0.2, duration: 0.2 }}
+                                    >
+                                      <p className="text-xs text-slate-400 mb-1 font-semibold uppercase">Cut</p>
+                                      <p className="font-bold text-base text-slate-900">{stone.cut}</p>
+                                    </motion.div>
+                                  )}
+                                  {stone.clarity && (
+                                    <motion.div
+                                      initial={{ opacity: 0, y: 10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: 0.25, duration: 0.2 }}
+                                    >
+                                      <p className="text-xs text-slate-400 mb-1 font-semibold uppercase">Clarity</p>
+                                      <p className="font-bold text-base text-slate-900">{stone.clarity}</p>
+                                    </motion.div>
+                                  )}
+                                  {stone.color && (
+                                    <motion.div
+                                      initial={{ opacity: 0, y: 10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: 0.3, duration: 0.2 }}
+                                    >
+                                      <p className="text-xs text-slate-400 mb-1 font-semibold uppercase">Color</p>
+                                      <p className="font-bold text-base text-slate-900">{stone.color}</p>
+                                    </motion.div>
+                                  )}
+                                </div>
+                              </motion.div>
+                            ))}
+                          </div>
+                        ) : (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="text-center py-8 bg-white rounded-2xl border border-slate-100"
+                          >
+                            <Gem className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                            <p className="text-muted-foreground">This piece features pure gold without gemstones</p>
+                          </motion.div>
+                        )}
+                      </div>
+                    </motion.div>
+                  </TabsContent>
+                </AnimatePresence>
+
+                <AnimatePresence mode="wait">
+                  <TabsContent value="care" className="mt-0" key="care">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                    >
+                      <div className="max-w-4xl mx-auto bg-cream rounded-3xl p-6">
+                        <div className="flex items-center gap-4 mb-8">
+                          <div className="w-14 h-14 bg-gradient-to-br from-blue-50 to-blue-100 rounded-full flex items-center justify-center shadow-sm border border-blue-200/50">
+                            <Sparkles className="w-7 h-7 text-blue-700" />
+                          </div>
+                          <div>
+                            <h3 className="font-display text-2xl font-bold text-slate-900">Jewelry Care Guide</h3>
+                            <p className="text-sm text-slate-500 mt-1">Essential tips to maintain your precious jewelry</p>
+                          </div>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-6">
+                          {[
+                            {
+                              title: "Storage",
+                              desc: "Store each piece separately in a soft cloth pouch to prevent scratches. Keep away from direct sunlight and humidity.",
+                            },
+                            {
+                              title: "Cleaning",
+                              desc: "Gently clean with a soft, lint-free cloth. For deeper cleaning, use warm water with mild soap and dry thoroughly.",
+                            },
+                            {
+                              title: "Wearing",
+                              desc: "Remove jewelry before swimming, bathing, or exercising. Apply perfumes and cosmetics before wearing jewelry.",
+                            },
+                            {
+                              title: "Maintenance",
+                              desc: "Visit our store annually for professional cleaning and inspection. We offer complimentary polishing services.",
+                            },
+                          ].map((care, index) => (
+                            <motion.div
+                              key={index}
+                              custom={index}
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ 
+                                opacity: 1, 
+                                scale: 1,
+                                transition: { 
+                                  delay: index * 0.1, 
+                                  duration: 0.3, 
+                                  ease: [0.4, 0, 0.2, 1] 
+                                }
+                              }}
+                              whileHover={{ scale: 1.02, y: -2 }}
+                              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                              className="bg-white rounded-2xl p-6 border border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] cursor-pointer transition-shadow duration-300"
+                            >
+                              <h4 className="font-semibold text-lg text-slate-900 mb-3">{care.title}</h4>
+                              <p className="text-slate-600 text-sm leading-relaxed">{care.desc}</p>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  </TabsContent>
+                </AnimatePresence>
               </Tabs>
             </motion.div>
           </div>
@@ -441,29 +627,122 @@ const ProductDetails = () => {
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
-          <section className="py-16 bg-cream">
+          <section className="py-20 bg-gradient-to-b from-background via-cream/30 to-cream">
             <div className="container mx-auto px-4">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
-                  You May Also Like
-                </h2>
-                <Link to={`/catalogue?category=${product.category}`} className="text-primary hover:underline font-medium">
-                  View All
-                </Link>
-              </div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+              <motion.div
+                variants={slideUpVariants}
+                initial="initial"
+                animate="animate"
+                transition={{ delay: 0.3 }}
+                className="max-w-6xl mx-auto mb-16"
+              >
+                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+                  <div className="space-y-3">
+                    <p className="text-sm font-semibold text-gold uppercase tracking-widest">Curated Selection</p>
+                    <h2 className="font-display text-4xl md:text-4xl font-bold text-foreground leading-tight">
+                      You May Also Like
+                    </h2>
+                    <p className="text-lg text-slate-600 max-w-2xl pt-2">
+                      Discover other exquisite pieces from our collection that complement your style.
+                    </p>
+                  </div>
+                  <Link
+                    to={`/catalogue?category=${product.category}`}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-foreground font-semibold rounded-full hover:bg-gold/90 transition-all duration-300 hover:shadow-lg whitespace-nowrap"
+                  >
+                    View All Collection
+                    <ChevronRight className="w-5 h-5" />
+                  </Link>
+                </div>
+              </motion.div>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
                 {relatedProducts.map((product, index) => (
-                  <ProductCard
+                  <motion.div
                     key={product.id}
-                    product={product}
-                    index={index}
-                  />
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{
+                      delay: index * 0.1,
+                      duration: 0.4,
+                      ease: [0.4, 0, 0.2, 1],
+                    }}
+                    viewport={{ once: true, margin: "-100px" }}
+                  >
+                    <ProductCard product={product} index={index} />
+                  </motion.div>
                 ))}
               </div>
             </div>
           </section>
         )}
       </main>
+
+      {/* Lightbox */}
+      {isLightboxOpen && (
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-foreground/80 z-50"
+            onClick={() => setIsLightboxOpen(false)}
+          />
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center p-6"
+          >
+            <div className="relative w-full max-w-4xl h-[80vh]" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+              <img
+                src={images[selectedImageIndex]}
+                alt={`${product.name} - image ${selectedImageIndex + 1}`}
+                className="w-full h-full object-contain bg-black rounded-lg"
+                loading="eager"
+                decoding="async"
+              />
+
+              <div className="absolute left-0 right-0 bottom-6 flex justify-center gap-2">
+                {images.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={(e) => { e.stopPropagation(); setSelectedImageIndex(idx); }}
+                    className={`w-2 h-2 rounded-full ${selectedImageIndex === idx ? 'bg-white' : 'bg-white/40'}`}
+                    aria-label={`Go to image ${idx + 1}`}
+                  />
+                ))}
+              </div>
+
+              <button
+                onClick={(e) => { e.stopPropagation(); setSelectedImageIndex((i) => (i === 0 ? images.length - 1 : i - 1)); }}
+                aria-label="Previous image"
+                className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-background/80 rounded-full hover:bg-background shadow-lg"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+
+              <button
+                onClick={(e) => { e.stopPropagation(); setSelectedImageIndex((i) => (i === images.length - 1 ? 0 : i + 1)); }}
+                aria-label="Next image"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-background/80 rounded-full hover:bg-background shadow-lg"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+
+              <button
+                onClick={() => setIsLightboxOpen(false)}
+                aria-label="Close image viewer"
+                className="absolute right-3 top-3 p-2 bg-background/80 rounded-full hover:bg-background shadow-lg"
+              >
+                <span className="sr-only">Close</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      )}
 
       <Footer />
 

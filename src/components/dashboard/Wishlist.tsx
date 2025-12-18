@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useWishlist } from "@/hooks/use-wishlist";
 import { motion } from "framer-motion";
 import { Heart, ShoppingBag, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,23 +9,14 @@ import { products, Product } from "@/data/products";
 import { useToast } from "@/hooks/use-toast";
 
 const Wishlist = () => {
-  const [wishlistIds, setWishlistIds] = useState<number[]>(() => {
-    const saved = localStorage.getItem("wishlist");
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    // Mock data - pre-populate with some product IDs
-    return [1, 2, 4, 7];
-  });
+  const { ids: wishlistIds, remove } = useWishlist();
   const { toast } = useToast();
 
   const wishlistItems = products.filter((p) => wishlistIds.includes(Number(p.id)));
 
   const removeFromWishlist = (productId: string | number) => {
     const numId = Number(productId);
-    const updated = wishlistIds.filter((id) => id !== numId);
-    setWishlistIds(updated);
-    localStorage.setItem("wishlist", JSON.stringify(updated));
+    remove(numId);
     toast({
       title: "Removed from wishlist",
       description: "Item has been removed from your wishlist",
