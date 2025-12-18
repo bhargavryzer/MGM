@@ -50,35 +50,11 @@ const FilterSidebar: React.FC<Props> = ({
       aria-labelledby="filters-heading" 
       className="rounded-2xl border border-border/40 bg-gradient-to-br from-cream/90 to-background/95 backdrop-blur-sm p-8 shadow-xl hover:shadow-2xl transition-shadow duration-300"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8 pb-6 border-b border-border/30">
-        <div className="flex items-center gap-3">
-          <div>
-            {activeFiltersCount > 0 && (
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {activeFiltersCount} filter{activeFiltersCount > 1 ? 's' : ''} active
-              </p>
-            )}
-          </div>
-        </div>
-        {activeFiltersCount > 0 && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={clearFilters} 
-            className="text-primary hover:bg-primary/10 transition-all duration-300 hover:scale-105 h-9 px-4 rounded-lg" 
-            aria-label="Clear filters"
-          >
-            Clear All
-          </Button>
-        )}
-      </div>
-
       {/* Categories */}
       <div className="space-y-5 mb-8">
         <div className="flex items-center gap-2 mb-4">
           <Tag className="w-4 h-4 text-primary" />
-          <h4 className="text-sm font-bold tracking-wide text-foreground uppercase">
+          <h4 className="text-sm font-serif font-bold tracking-wide text-foreground uppercase">
             Category
           </h4>
         </div>
@@ -113,7 +89,7 @@ const FilterSidebar: React.FC<Props> = ({
       <div className="space-y-5 mb-8">
         <div className="flex items-center gap-2 mb-4">
           <Gem className="w-4 h-4 text-gold" />
-          <h4 className="text-sm font-bold tracking-wide text-foreground uppercase">
+          <h4 className="text-sm font-serif font-bold tracking-wide text-foreground uppercase">
             Gold Purity
           </h4>
         </div>
@@ -143,7 +119,7 @@ const FilterSidebar: React.FC<Props> = ({
       <div className="space-y-5 mb-8">
         <div className="flex items-center gap-2 mb-4">
           <Sparkles className="w-4 h-4 text-primary" />
-          <h4 className="text-sm font-bold tracking-wide text-foreground uppercase">
+          <h4 className="text-sm font-serif font-bold tracking-wide text-foreground uppercase">
             Special Collections
           </h4>
         </div>
@@ -172,7 +148,7 @@ const FilterSidebar: React.FC<Props> = ({
       <div className="space-y-6">
         <div className="flex items-center gap-2 mb-4">
           <IndianRupee className="w-4 h-4 text-primary" />
-          <h4 className="text-sm font-bold tracking-wide text-foreground uppercase">
+          <h4 className="text-sm font-serif font-bold tracking-wide text-foreground uppercase">
             Price Range
           </h4>
         </div>
