@@ -146,15 +146,17 @@ const Catalogue = () => {
 
       <main className="pb-20">
         {/* Modern Page Header with South Indian Jewelry Background */}
-        <section className="relative min-h-[500px] py-16 lg:py-20 overflow-hidden">
+        <section className="relative overflow-hidden py-16 lg:py-20 min-h-[520px]">
           <div className="absolute inset-0">
-            <img 
-              src="https://images.pexels.com/photos/1266808/pexels-photo-1266808.jpeg?w=1920&h=600&fit=crop&crop=center" 
-              alt="Traditional South Indian Gold Jewelry" 
-              className="w-full h-full object-cover"
+            <img
+              src="https://images.unsplash.com/photo-1752786768226-b624a5261654?auto=format&fit=crop&w=1920&q=80"
+              alt="South Indian bride adorned in traditional gold jewellery"
+              className="h-full w-full object-cover object-center"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/80" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/80" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </div>
+
           <div className="container mx-auto px-4 relative z-10">
             <motion.div
               variants={slideUpVariants}
@@ -199,12 +201,13 @@ const Catalogue = () => {
                   <Button
                     variant="outline"
                     onClick={() => setIsFilterOpen(!isFilterOpen)}
-                    className="lg:hidden h-14 px-6 rounded-xl border-primary/30 hover:bg-primary/10 w-full sm:w-auto"
+                    className="lg:hidden w-full sm:w-auto"
+                    size="lg"
                   >
                     <SlidersHorizontal className="w-5 h-5 mr-2" />
                     Filters
                     {activeFiltersCount > 0 && (
-                      <Badge variant="secondary" className="ml-2 bg-primary/20 text-primary border-primary/30">
+                      <Badge variant="secondary" className="ml-2">
                         {activeFiltersCount}
                       </Badge>
                     )}

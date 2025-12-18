@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { products, formatPrice } from "@/data/products";
 
 const Wishlist = () => {
   const { ids: wishlistIds, remove } = useWishlist();
@@ -15,75 +16,25 @@ const Wishlist = () => {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
 
-  // Initialize with some mock wishlist items if empty
+  const defaultWishlistIds = ["1", "2", "3", "4", "5"];
+
+  // Initialize with some wishlist items from actual products if empty
   React.useEffect(() => {
-    // Always show mock data for demonstration
-    const mockWishlistIds = [1, 2, 3, 4, 5, 6, 7, 8]; // More comprehensive sample product IDs
-    mockWishlistIds.forEach(id => {
+    // Always show mock data for demonstration using actual product IDs
+    defaultWishlistIds.forEach(id => {
       // This would normally update the wishlist state
       console.log(`Mock wishlist item: ${id}`);
     });
   }, [wishlistIds]);
 
-  // Enhanced mock data for demonstration with jewelry-specific web images
-  const mockWishlistItems = [
-    {
-      id: 1,
-      name: "Traditional Gold Necklace",
-      category: "necklaces",
-      price: "₹45,999",
-      image: "https://images.unsplash.com/photo-1596944933706-3c8a3a5b9a8a?w=400&h=500&fit=crop&auto=format"
-    },
-    {
-      id: 2,
-      name: "Diamond Stud Earrings",
-      category: "earrings", 
-      price: "₹28,499",
-      image: "https://images.unsplash.com/photo-1515562141207-7a88fb7c33e3?w=400&h=500&fit=crop&auto=format"
-    },
-    {
-      id: 3,
-      name: "Silver Charm Bracelet",
-      category: "bracelets",
-      price: "₹12,999",
-      image: "https://images.unsplash.com/photo-1604672381552-e0339e3a7dcd?w=400&h=500&fit=crop&auto=format"
-    },
-    {
-      id: 4,
-      name: "Ruby Solitaire Ring",
-      category: "rings",
-      price: "₹35,749",
-      image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=500&fit=crop&auto=format"
-    },
-    {
-      id: 5,
-      name: "Pearl Drop Pendant",
-      category: "pendants",
-      price: "₹18,299",
-      image: "https://images.unsplash.com/photo-1599643789224-9a024161d37a6?w=400&h=500&fit=crop&auto=format"
-    },
-    {
-      id: 6,
-      name: "22K Gold Bangles",
-      category: "bangles",
-      price: "₹52,999",
-      image: "https://images.unsplash.com/photo-1601314050351-0bdf1d8b4b5e?w=400&h=500&fit=crop&auto=format"
-    },
-    {
-      id: 7,
-      name: "Emerald Drop Earrings",
-      category: "earrings",
-      price: "₹22,499",
-      image: "https://images.unsplash.com/photo-1573403325484-234b23f7d3f1?w=400&h=500&fit=crop&auto=format"
-    },
-    {
-      id: 8,
-      name: "Platinum Link Chain",
-      category: "chains",
-      price: "₹38,999",
-      image: "https://images.unsplash.com/photo-1611595771532-2a0212d25d2c?w=400&h=500&fit=crop&auto=format"
-    }
-  ];
+  // Use actual catalogue products for wishlist demonstration
+  const mockWishlistItems = products
+    .filter((product) => defaultWishlistIds.includes(product.id))
+    .map((product) => ({
+      ...product,
+      price: formatPrice(product.price),
+      originalPrice: product.originalPrice ? formatPrice(product.originalPrice) : undefined,
+    }));
 
   const wishlistItems = mockWishlistItems; // Always show mock data for demonstration
 
@@ -230,13 +181,12 @@ const Wishlist = () => {
                 <Button
                   variant="outline"
                   onClick={() => setShowRemoveDialog(false)}
-                  className="border-primary/30 hover:bg-primary/10 transition-all duration-300"
                 >
                   Cancel
                 </Button>
                 <Button
+                  variant="destructive"
                   onClick={confirmRemove}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-all duration-300"
                 >
                   Remove Item
                 </Button>

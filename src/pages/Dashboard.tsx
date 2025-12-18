@@ -94,12 +94,12 @@ const Dashboard = () => {
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="p-6 border-b border-primary-foreground/20">
-            <Link to="/" className="flex items-center gap-3">
+          <div className="p-6 border-b border-primary-foreground/20 flex justify-center">
+            <Link to="/" className="flex items-center justify-center">
               <img 
                 src="/images/footer-logo.png" 
                 alt="MGM MEGA GOLD MART Logo" 
-                className="h-10 w-auto"
+                className="h-8 w-auto max-w-full object-contain"
               />
             </Link>
           </div>

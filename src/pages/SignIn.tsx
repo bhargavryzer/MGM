@@ -46,14 +46,14 @@ const SignIn = () => {
 
   return (
     <AnimatedPage className="min-h-screen flex">
-      {/* Left Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-background relative">
+      {/* Left Side - Form with Footer Background */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-gradient-mgm text-primary-foreground relative">
         {/* Back button - rounded */}
         <button
           type="button"
           onClick={() => navigate("/")}
           aria-label="Go back to landing page"
-          className="absolute left-6 top-6 z-20 inline-flex items-center justify-center h-10 w-10 rounded-full bg-gradient-mgm text-primary-foreground shadow-md hover:opacity-90 transition-opacity ring-1 ring-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className="absolute left-6 top-6 z-20 inline-flex items-center justify-center h-10 w-10 rounded-full bg-background/20 text-primary-foreground shadow-md hover:bg-background/30 transition-opacity ring-1 ring-primary-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary-foreground/40"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -63,20 +63,22 @@ const SignIn = () => {
           animate="animate"
           className="w-full max-w-md"
         >
-          {/* Logo */}
-          <Link to="/" className="inline-block mb-8">
-            <img 
-              src="/images/header-logo.png" 
-              alt="MGM MEGA GOLD MART Logo" 
-              className="h-12 w-auto"
-            />
-          </Link>
+          {/* Logo - Footer Logo */}
+          <div className="flex justify-center mb-8">
+            <Link to="/" className="inline-block">
+              <img 
+                src="/images/footer-logo.png" 
+                alt="MGM MEGA GOLD MART Logo" 
+                className="h-16 w-auto"
+              />
+            </Link>
+          </div>
 
           <div className="mb-8">
-            <h1 className="font-display text-3xl font-bold text-foreground mb-2">
+            <h1 className="font-display text-3xl font-bold text-primary-foreground mb-2">
               {isSignUp ? "Create Account" : "Welcome Back"}
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-primary-foreground/80">
               {isSignUp
                 ? "Join MGM Jewels and discover exclusive collections"
                 : "Sign in to access your account and orders"}
@@ -165,7 +167,7 @@ const SignIn = () => {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-background/20 border border-primary-foreground/30 text-primary-foreground hover:bg-background/30 hover:border-primary-foreground/50 backdrop-blur-sm"
               size="lg"
               disabled={isLoading}
             >
@@ -176,17 +178,17 @@ const SignIn = () => {
           <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border"></div>
+                <div className="w-full border-t border-primary-foreground/20"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-background text-muted-foreground">
+                <span className="px-4 bg-gradient-mgm text-primary-foreground/80">
                   Or continue with
                 </span>
               </div>
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-4">
-              <Button variant="outline" type="button">
+              <Button variant="outline" type="button" className="bg-background/10 border-primary-foreground/30 text-primary-foreground hover:bg-background/20 hover:border-primary-foreground/50">
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <path
                     fill="currentColor"
@@ -207,7 +209,7 @@ const SignIn = () => {
                 </svg>
                 Google
               </Button>
-              <Button variant="outline" type="button">
+              <Button variant="outline" type="button" className="bg-background/10 border-primary-foreground/30 text-primary-foreground hover:bg-background/20 hover:border-primary-foreground/50">
                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z" />
                 </svg>
@@ -216,12 +218,12 @@ const SignIn = () => {
             </div>
           </div>
 
-          <p className="mt-8 text-center text-muted-foreground">
+          <p className="mt-8 text-center text-primary-foreground/80">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-primary hover:underline font-medium"
+              className="text-primary-foreground hover:underline font-medium"
             >
               {isSignUp ? "Sign In" : "Sign Up"}
             </button>

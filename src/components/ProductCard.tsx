@@ -1,11 +1,9 @@
 import { Link } from "react-router-dom";
-import { Heart, ShoppingBag, Eye } from "lucide-react";
+import { Heart, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 import { Product, formatPrice } from "@/data/products";
 import { cardVariants, hoverLift } from "@/lib/animations";
 import { useWishlist } from "@/hooks/use-wishlist";
-import QuickViewModal from "@/components/QuickViewModal";
-import { useState } from "react";
 interface ProductCardProps {
   product: Product;
   index?: number;
@@ -17,7 +15,6 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
     : 0;
 
   const wishlist = useWishlist();
-  const [isQuickOpen, setIsQuickOpen] = useState(false);
 
   const WishlistButton = ({ productId }: { productId: string | number }) => (
     <button
@@ -26,16 +23,6 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
       aria-label="Toggle wishlist"
     >
       <Heart className="w-4 h-4" />
-    </button>
-  );
-
-  const QuickButton = ({ productId }: { productId: string | number }) => (
-    <button
-      onClick={(e) => { e.stopPropagation(); e.preventDefault(); setIsQuickOpen(true); }}
-      className="p-2 bg-background/90 rounded-full hover:bg-background transition-colors shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
-      aria-label="Quick view"
-    >
-      <Eye className="w-4 h-4" />
     </button>
   );
 
@@ -73,7 +60,6 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
           {/* Actions */}
           <div className="absolute top-3 right-3 z-10 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <WishlistButton productId={product.id} />
-            <QuickButton productId={product.id} />
             <button
               className="p-2 bg-background/90 rounded-full hover:bg-background transition-colors shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
               aria-label="Add to cart"
@@ -81,10 +67,6 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
               <ShoppingBag className="w-4 h-4" />
             </button>
           </div>
-
-          {isQuickOpen && (
-            <QuickViewModal product={product} isOpen={isQuickOpen} onClose={() => setIsQuickOpen(false)} />
-          )}
 
           {/* Image */}
           <img

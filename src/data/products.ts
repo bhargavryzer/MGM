@@ -46,15 +46,77 @@ export interface Product {
 export interface Category {
   id: string;
   name: string;
+  description: string;
   image: string;
   count: number;
+  featured: boolean;
 }
 
 export const categories: Category[] = [
-  { id: "rings", name: "Rings", image: ringCategory, count: 124 },
-  { id: "earrings", name: "Earrings", image: earringCategory, count: 89 },
-  { id: "necklaces", name: "Necklaces", image: necklaceCategory, count: 156 },
-  { id: "bangles", name: "Bangles", image: bangleCategory, count: 67 },
+  {
+    id: "rings",
+    name: "Rings",
+    description: "Exquisite rings from traditional to contemporary designs",
+    image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=400&q=80",
+    count: 24,
+    featured: true
+  },
+  {
+    id: "necklaces",
+    name: "Necklaces",
+    description: "Elegant necklaces and chains for every occasion",
+    image: "https://images.unsplash.com/photo-1596944924676-5e1a5b2b0d5a?auto=format&fit=crop&w=400&q=80",
+    count: 18,
+    featured: true
+  },
+  {
+    id: "earrings",
+    name: "Earrings",
+    description: "Beautiful earrings from studs to dangling designs",
+    image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=400&q=80",
+    count: 32,
+    featured: true
+  },
+  {
+    id: "bangles",
+    name: "Bangles",
+    description: "Traditional and modern bangles in gold and diamond",
+    image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&w=400&q=80",
+    count: 15,
+    featured: true
+  },
+  {
+    id: "pendants",
+    name: "Pendants",
+    description: "Intricate pendants and lockets with precious stones",
+    image: "https://images.unsplash.com/photo-1596944924676-5e1a5b2b0d5a?auto=format&fit=crop&w=400&q=80",
+    count: 20,
+    featured: false
+  },
+  {
+    id: "bracelets",
+    name: "Bracelets",
+    description: "Stylish bracelets for everyday and special occasions",
+    image: "https://images.unsplash.com/photo-1611095556553-ab23bbae84a0?auto=format&fit=crop&w=400&q=80",
+    count: 12,
+    featured: false
+  },
+  {
+    id: "mangalsutras",
+    name: "Mangalsutras",
+    description: "Traditional mangalsutras with modern designs",
+    image: "https://images.unsplash.com/photo-1515376398920-3c758b0b6aaf?auto=format&fit=crop&w=400&q=80",
+    count: 8,
+    featured: false
+  },
+  {
+    id: "chains",
+    name: "Chains",
+    description: "Gold chains in various thicknesses and styles",
+    image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&w=400&q=80",
+    count: 16,
+    featured: false
+  }
 ];
 
 export const products: Product[] = [

@@ -1,29 +1,28 @@
 import { Link } from "react-router-dom";
-import { Search, User, Menu, X, Heart } from "lucide-react";
+import { Search, User, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { drawerVariants, hoverScale } from "@/lib/animations";
+import { Input } from "@/components/ui/input";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Collections", href: "/catalogue" },
-    { name: "Rings", href: "/catalogue?category=rings" },
-    { name: "Earrings", href: "/catalogue?category=earrings" },
-    { name: "Necklaces", href: "/catalogue?category=necklaces" },
-    { name: "Bangles", href: "/catalogue?category=bangles" },
+    { name: "Our Story", href: "/story" },
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-mgm text-primary-foreground backdrop-blur-md border-b border-border">
+    <header className="sticky top-0 z-50 bg-gradient-mgm text-primary-foreground backdrop-blur-md">
       {/* Top Bar removed per design request */}
 
       {/* Main Header */}
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-24">
           {/* Mobile Menu Button */}
           <button
             className="lg:hidden p-2"
@@ -59,12 +58,13 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-4">
-            <button className="p-2 text-primary-foreground/90 hover:text-primary-foreground transition-colors" aria-label="Search">
+            <button 
+              className="p-2 text-primary-foreground/90 hover:text-primary-foreground transition-colors" 
+              aria-label="Search"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+            >
               <Search className="w-5 h-5" />
             </button>
-            <Link to="/dashboard" className="p-2 text-primary-foreground/90 hover:text-primary-foreground transition-colors hidden sm:block" aria-label="Wishlist">
-              <Heart className="w-5 h-5" />
-            </Link>
             <Link to="/dashboard" className="p-2 text-primary-foreground/90 hover:text-primary-foreground transition-colors" aria-label="Dashboard">
               <User className="w-5 h-5" />
             </Link>
@@ -104,6 +104,37 @@ const Header = () => {
               </Link>
             </div>
           </motion.nav>
+        )}
+      </AnimatePresence>
+      
+      {/* Slide-out Search Bar */}
+      <AnimatePresence>
+        {isSearchOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="bg-cream border-b border-border"
+          >
+            <div className="container mx-auto px-4 py-4">
+              <div className="relative max-w-2xl mx-auto">
+                <Input
+                  type="text"
+                  placeholder="Search for jewelry, collections, or categories..."
+                  className="w-full pl-12 pr-4 h-12 bg-background border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg"
+                  autoFocus
+                />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <button
+                  onClick={() => setIsSearchOpen(false)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Close search"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </header>

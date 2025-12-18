@@ -9,6 +9,7 @@ import Catalogue from "./pages/Catalogue";
 import ProductDetails from "./pages/ProductDetails";
 import SignIn from "./pages/SignIn";
 import Dashboard from "./pages/Dashboard";
+import OurStory from "./pages/OurStory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const AppWithTransitions = () => {
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/story" element={<OurStory />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

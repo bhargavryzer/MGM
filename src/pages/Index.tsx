@@ -58,16 +58,17 @@ const Index = () => {
               <div className="flex flex-wrap gap-4">
                 <Link to="/catalogue">
                   <motion.div {...hoverScale}>
-                    <Button variant="hero" size="lg">
-                      Explore Collection
-                      <ArrowRight className="w-5 h-5" />
-                    </Button>
-                  </motion.div>
-                </Link>
-                <Link to="/catalogue?category=necklaces">
-                  <motion.div {...hoverScale}>
-                    <Button variant="hero-outline" size="lg">
-                      Shop Necklaces
+                    <Button 
+                      variant="hero-outline" 
+                      size="lg"
+                      className="relative bg-gradient-to-br from-yellow-200/20 via-yellow-400/30 to-yellow-600/20 backdrop-blur-md border border-yellow-300/50 hover:border-yellow-400/70 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden group"
+                    >
+                      <span className="relative z-10">Explore Collection</span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 via-yellow-200/60 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/30 via-yellow-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 bg-gradient-to-br from-yellow-200/30 via-transparent to-yellow-600/30"></div>
+                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-yellow-300/20 opacity-60"></div>
+                      <div className="absolute inset-0 bg-gradient-to-bl from-yellow-300/20 via-transparent to-yellow-500/20"></div>
                     </Button>
                   </motion.div>
                 </Link>
@@ -140,37 +141,54 @@ const Index = () => {
               </h2>
             </motion.div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-              {categories.map((category, index) => (
-                <motion.div
-                  key={category.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="flex flex-col items-center"
-                >
-                  <Link
-                    to={`/catalogue?category=${category.id}`}
-                    className="group block relative overflow-hidden rounded-full w-40 h-40 md:w-52 md:h-52 lg:w-60 lg:h-60"
+            <div className="w-full overflow-hidden py-16">
+              <motion.div 
+                className="flex gap-8"
+                animate={{ x: 0 }}
+                whileHover={{
+                  x: [-2000, 0],
+                  transition: {
+                    x: {
+                      repeat: Infinity,
+                      repeatType: "loop",
+                      duration: 20,
+                      ease: "linear",
+                    },
+                  }
+                }}
+              >
+                {/* Triple categories for seamless full-width loop */}
+                {[...categories, ...categories, ...categories].map((category, index) => (
+                  <motion.div
+                    key={`${category.id}-${index}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: (index % categories.length) * 0.1 }}
+                    className="flex flex-col items-center flex-shrink-0 w-40 md:w-52 lg:w-60"
                   >
-                    <img
-                      src={category.image}
-                      alt={category.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent rounded-full" />
-                  </Link>
-                  <div className="text-center mt-4">
-                    <h3 className="font-elegant text-lg md:text-xl font-semibold text-foreground">
-                      {category.name}
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      {category.count} Products
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
+                    <Link
+                      to={`/catalogue?category=${category.id}`}
+                      className="group block relative overflow-hidden rounded-full w-40 h-40 md:w-52 md:h-52 lg:w-60 lg:h-60"
+                    >
+                      <img
+                        src={category.image}
+                        alt={category.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent rounded-full" />
+                    </Link>
+                    <div className="text-center mt-4">
+                      <h3 className="font-elegant text-lg md:text-xl font-semibold text-foreground">
+                        {category.name}
+                      </h3>
+                      <p className="text-muted-foreground text-sm">
+                        {category.count} Products
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
             </div>
           </div>
         </section>
@@ -229,9 +247,19 @@ const Index = () => {
                 Make your special day even more memorable with our handcrafted jewelry.
               </p>
               <Link to="/catalogue">
-                <Button variant="gold" size="xl">
-                  Shop Bridal Collection
-                  <ArrowRight className="w-5 h-5" />
+                <Button 
+                  variant="gold" 
+                  size="xl"
+                  className="relative bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 hover:from-yellow-400 hover:via-yellow-500 hover:to-yellow-600 text-foreground shadow-xl hover:shadow-2xl border border-yellow-200/60 hover:border-yellow-300/80 transition-all duration-300 transform hover:scale-105 overflow-hidden group"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    Shop Bridal Collection
+                    <ArrowRight className="w-5 h-5" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 via-yellow-200/60 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/30 via-yellow-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-200/30 via-transparent to-yellow-600/30"></div>
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-yellow-300/20 opacity-60"></div>
                 </Button>
               </Link>
             </motion.div>
@@ -294,7 +322,7 @@ const Index = () => {
                   placeholder="Enter your email"
                   className="flex-1 px-6 py-4 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-gold text-foreground"
                 />
-                <Button variant="default" size="lg" type="submit">
+                <Button variant="outline" size="lg" type="submit" className="px-6 py-5">
                   Subscribe
                 </Button>
               </form>
